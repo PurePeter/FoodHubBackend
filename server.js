@@ -16,12 +16,6 @@ const port = 3001;
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
-// Middleware để phục vụ các file tĩnh từ thư mục 'assets/img' của Frontend
-// Ví dụ: truy cập /api/images/pho.jpg sẽ lấy file từ FoodHubWebsite/Frontend/assets/img/pho.jpg
-app.use(
-  "/api/images",
-  express.static(path.join(__dirname, "../FoodHubWebsite/Frontend/assets/img"))
-);
 
 // --- Server-Sent Events (SSE) Setup ---
 let clients = []; // Mảng lưu trữ các client đang kết nối
@@ -211,7 +205,9 @@ app.post("/api/login", async (req, res) => {
 // Endpoint để lấy tất cả banner slides
 app.get("/api/bannerslides", async (req, res) => {
   try {
-    const bannerSlides = await BannerSlide.find({}); // Lấy toàn bộ document
+    const bannerSlides = await BannerSlide.find({}).select(
+      "-imageData -contentType"
+    );
     res.json(bannerSlides);
   } catch (error) {
     console.error("Error fetching banner slides:", error);
@@ -219,6 +215,26 @@ app.get("/api/bannerslides", async (req, res) => {
       message: "Server error when fetching banner slides",
       error: error.message,
     });
+  }
+});
+
+// Endpoint để phục vụ ảnh banner slide từ MongoDB
+app.get("/api/bannerslides/:id/image", async (req, res) => {
+  try {
+    // Thêm bước kiểm tra tính hợp lệ của ObjectId
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).send("Invalid ID format");
+    }
+
+    const slide = await BannerSlide.findById(req.params.id);
+    if (!slide || !slide.imageData || !slide.contentType) {
+      return res.status(404).send("Image not found");
+    }
+    res.set("Content-Type", slide.contentType);
+    res.send(slide.imageData);
+  } catch (error) {
+    console.error("Error serving banner image:", error);
+    res.status(500).send("Server error");
   }
 });
 

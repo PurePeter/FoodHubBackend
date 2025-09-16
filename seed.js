@@ -11,7 +11,10 @@ const BannerSlide = require("./models/BannerSlide"); // Import BannerSlide model
 
 // Hàm để đọc file ảnh và trả về Buffer cùng với contentType
 async function getImageData(imagePath) {
-  const fullPath = path.join(__dirname, imagePath); // Tạo đường dẫn tuyệt đối
+  // Sửa lỗi đường dẫn:
+  // path.resolve sẽ tạo đường dẫn tuyệt đối từ thư mục hiện tại của script (__dirname)
+  // và đường dẫn tương đối (imagePath) một cách chính xác.
+  const fullPath = path.resolve(__dirname, imagePath);
   const imageData = fs.readFileSync(fullPath); // Đọc file ảnh
   const ext = path.extname(fullPath).toLowerCase(); // Lấy phần mở rộng của file
 
@@ -164,10 +167,19 @@ const seedDB = async () => {
     await BannerSlide.deleteMany({});
     console.log('Đã xóa dữ liệu cũ trong collection "bannerslides".');
 
-    const bannerSlidesToInsert = bannerSlideData; // Dữ liệu đã có định dạng { imageName: '...' }
+    const bannerSlidesToInsert = [];
+    for (const item of bannerSlideData) {
+      const imagePath = `../FoodHubWebsite/Frontend/assets/img/${item.imageName}`;
+      const { imageData, contentType } = await getImageData(imagePath);
+      bannerSlidesToInsert.push({
+        imageName: item.imageName,
+        imageData: imageData,
+        contentType: contentType,
+      });
+    }
 
     await BannerSlide.insertMany(bannerSlidesToInsert);
-    console.log("Đã thêm dữ liệu banner slide thành công!");
+    console.log("Đã thêm dữ liệu banner slide với ảnh vào DB thành công!");
   } catch (error) {
     console.error("Lỗi khi thêm dữ liệu:", error);
   } finally {
