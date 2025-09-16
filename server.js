@@ -18,7 +18,10 @@ app.use(cors());
 app.use(express.json());
 // Middleware để phục vụ các file tĩnh từ thư mục 'assets/img' của Frontend
 // Ví dụ: truy cập /api/images/pho.jpg sẽ lấy file từ FoodHubWebsite/Frontend/assets/img/pho.jpg
-app.use("/api/images", express.static(path.join(__dirname, "../FoodHubWebsite/Frontend/assets/img")));
+app.use(
+  "/api/images",
+  express.static(path.join(__dirname, "../FoodHubWebsite/Frontend/assets/img"))
+);
 
 // --- Server-Sent Events (SSE) Setup ---
 let clients = []; // Mảng lưu trữ các client đang kết nối
@@ -83,7 +86,8 @@ app.get("/api/events", (req, res) => {
 // Endpoint để lấy tất cả món ăn
 app.get("/api/dishes", async (req, res) => {
   try {
-    const dishes = await Dish.find({});
+    // Chỉ lấy các trường cần thiết, loại bỏ imageData và contentType để giảm kích thước payload
+    const dishes = await Dish.find({}).select("-imageData -contentType");
     res.json(dishes);
   } catch (error) {
     console.error("Error fetching dishes:", error);
@@ -207,7 +211,7 @@ app.post("/api/login", async (req, res) => {
 // Endpoint để lấy tất cả banner slides
 app.get("/api/bannerslides", async (req, res) => {
   try {
-    const bannerSlides = await BannerSlide.find({}, "imageName"); // Chỉ lấy trường imageName
+    const bannerSlides = await BannerSlide.find({}); // Lấy toàn bộ document
     res.json(bannerSlides);
   } catch (error) {
     console.error("Error fetching banner slides:", error);

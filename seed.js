@@ -164,9 +164,7 @@ const seedDB = async () => {
     await BannerSlide.deleteMany({});
     console.log('Đã xóa dữ liệu cũ trong collection "bannerslides".');
 
-    const bannerSlidesToInsert = bannerSlideData.map(slide => ({
-      imageUrl: `../FoodHubWebsite/Frontend/assets/img/${slide.imageName}`
-    }));
+    const bannerSlidesToInsert = bannerSlideData; // Dữ liệu đã có định dạng { imageName: '...' }
 
     await BannerSlide.insertMany(bannerSlidesToInsert);
     console.log("Đã thêm dữ liệu banner slide thành công!");
