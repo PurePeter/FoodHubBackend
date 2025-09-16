@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const path = require("path"); // Thêm module path
 require("dotenv").config(); // Nạp biến môi trường
 
 const Dish = require("./models/Dish");
@@ -15,12 +16,38 @@ const port = 3001;
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
+// Middleware để phục vụ các file tĩnh từ thư mục 'assets/img' của Frontend
+// Ví dụ: truy cập /api/images/pho.jpg sẽ lấy file từ FoodHubWebsite/Frontend/assets/img/pho.jpg
+app.use("/api/images", express.static(path.join(__dirname, "../FoodHubWebsite/Frontend/assets/img")));
+
+// --- Server-Sent Events (SSE) Setup ---
+let clients = []; // Mảng lưu trữ các client đang kết nối
+
+// Hàm gửi sự kiện đến tất cả các client
+function sendEventToClients(data) {
+  clients.forEach((client) =>
+    client.res.write(`data: ${JSON.stringify(data)}\n\n`)
+  );
+}
+
+// Wrapper cho console.log và console.error để gửi sự kiện
+const originalLog = console.log;
+const originalError = console.error;
+console.log = (...args) => {
+  originalLog.apply(console, args);
+  sendEventToClients({ type: "log", message: args.join(" ") });
+};
+console.error = (...args) => {
+  originalError.apply(console, args);
+  sendEventToClients({ type: "error", message: args.join(" ") });
+};
 
 // --- Kết nối MongoDB ---
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected successfully!"))
   .catch((err) => console.error("MongoDB connection error:", err));
+originalLog("Starting FoodHub Backend Server v2..."); // Dùng bản gốc để tránh gửi event này
 
 // --- Root Endpoint ---
 // Thêm một route cho đường dẫn gốc ("/") để kiểm tra server
@@ -31,6 +58,27 @@ app.get("/", (req, res) => {
 });
 
 // --- API Endpoints ---
+
+// Endpoint cho Server-Sent Events
+app.get("/api/events", (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders(); // Gửi headers ngay lập tức
+
+  const clientId = Date.now();
+  const newClient = {
+    id: clientId,
+    res,
+  };
+  clients.push(newClient);
+  originalLog(`Client ${clientId} connected to SSE.`);
+
+  req.on("close", () => {
+    clients = clients.filter((client) => client.id !== clientId);
+    originalLog(`Client ${clientId} disconnected from SSE.`);
+  });
+});
 
 // Endpoint để lấy tất cả món ăn
 app.get("/api/dishes", async (req, res) => {
@@ -159,7 +207,7 @@ app.post("/api/login", async (req, res) => {
 // Endpoint để lấy tất cả banner slides
 app.get("/api/bannerslides", async (req, res) => {
   try {
-    const bannerSlides = await BannerSlide.find({});
+    const bannerSlides = await BannerSlide.find({}, "imageName"); // Chỉ lấy trường imageName
     res.json(bannerSlides);
   } catch (error) {
     console.error("Error fetching banner slides:", error);
@@ -171,5 +219,5 @@ app.get("/api/bannerslides", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  originalLog(`Server is running on port ${port}`);
 });
