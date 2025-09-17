@@ -8,6 +8,7 @@ console.log("Giá trị MONGODB_URI được nạp:", process.env.MONGODB_URI);
 
 const Dish = require("./models/Dish"); // Import model
 const BannerSlide = require("./models/BannerSlide"); // Import BannerSlide model
+const Notification = require("./models/Notification"); // Import Notification model
 
 // Hàm để đọc file ảnh và trả về Buffer cùng với contentType
 async function getImageData(imagePath) {
@@ -38,7 +39,7 @@ async function getImageData(imagePath) {
   return { imageData, contentType };
 }
 
-// --- DỮ LIỆU MENU-LIST ---
+// --- DỮ LIỆU MENU-LIST --
 // Đây là nơi bạn định nghĩa tất cả các món ăn sẽ được thêm vào cơ sở dữ liệu.
 // Hãy chắc chắn rằng đường dẫn `imageUrl` là chính xác.
 const menuListData = [
@@ -129,6 +130,38 @@ const menuListData = [
   },
 ];
 
+// --- DỮ LIỆU NOTIFICATION --
+const notificationData = [
+  {
+    title: "Khuyến mãi salad mùa hè!",
+    description: "Giảm giá 20% cho tất cả các món salad.",
+    image: "../FoodHubWebsite/Frontend/assets/img/salad.jpg",
+    link: "#",
+    time: "30 phút trước",
+  },
+  {
+    title: "Pizza thứ tư siêu ưu đãi!",
+    description: "Mua 2 tặng 1 áp dụng cho size M và size L",
+    image: "../FoodHubWebsite/Frontend/assets/img/pizza.jpg",
+    link: "#",
+    time: "50 phút trước",
+  },
+  {
+    title: "Tặng nước miễn phí!",
+    description: "Gọi món combo sẽ được tặng 1 nước ngẫu nhiên.",
+    image: "../FoodHubWebsite/Frontend/assets/img/drink.png",
+    link: "#",
+    time: "1 giờ trước",
+  },
+  {
+    title: "Burger ngày chủ nhật!",
+    description: "Giảm 25% cho tất cả các loại burger hôm nay.",
+    image: "../FoodHubWebsite/Frontend/assets/img/burger.jpg",
+    link: "#",
+    time: "2 giờ trước",
+  },
+];
+
 const seedDB = async () => {
   try {
     // Kết nối tới MongoDB Atlas
@@ -180,6 +213,13 @@ const seedDB = async () => {
 
     await BannerSlide.insertMany(bannerSlidesToInsert);
     console.log("Đã thêm dữ liệu banner slide với ảnh vào DB thành công!");
+
+    // --- SEED NOTIFICATIONS ---
+    await Notification.deleteMany({});
+    console.log('Đã xóa dữ liệu cũ trong collection "notifications".');
+    await Notification.insertMany(notificationData);
+    console.log("Đã thêm dữ liệu thông báo thành công!");
+
   } catch (error) {
     console.error("Lỗi khi thêm dữ liệu:", error);
   } finally {

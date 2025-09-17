@@ -9,6 +9,7 @@ require("dotenv").config(); // Nạp biến môi trường
 const Dish = require("./models/Dish");
 const User = require("./models/User"); // Import User model
 const BannerSlide = require("./models/BannerSlide"); // Import BannerSlide model
+const Notification = require("./models/Notification"); // Import Notification model
 
 const app = express();
 const port = 3001;
@@ -235,6 +236,51 @@ app.get("/api/bannerslides/:id/image", async (req, res) => {
   } catch (error) {
     console.error("Error serving banner image:", error);
     res.status(500).send("Server error");
+  }
+});
+
+// --- Notification Endpoints ---
+
+// Endpoint để lấy tất cả thông báo
+app.get("/api/notifications", async (req, res) => {
+  try {
+    // Lấy các thông báo mới nhất, giới hạn 20
+    const notifications = await Notification.find({})
+      .sort({ createdAt: -1 })
+      .limit(20);
+    res.json(notifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({
+      message: "Server error when fetching notifications",
+      error: error.message,
+    });
+  }
+});
+
+// Endpoint để tạo một thông báo mới (để test)
+app.post("/api/notifications", async (req, res) => {
+  try {
+    const { title, description, image, link, time } = req.body;
+
+    if (!title || !description || !image || !time) {
+      return res
+        .status(400)
+        .json({ message: "Vui lòng cung cấp đủ các trường bắt buộc." });
+    }
+
+    const newNotification = new Notification({
+      title,
+      description,
+      image,
+      link,
+      time,
+    });
+    const savedNotification = await newNotification.save();
+    res.status(201).json(savedNotification);
+  } catch (error) {
+    console.error("Error creating notification:", error);
+    res.status(500).json({ message: "Lỗi máy chủ khi tạo thông báo." });
   }
 });
 
