@@ -240,11 +240,9 @@ app.get("/api/bannerslides/:id/image", async (req, res) => {
 });
 
 // --- Notification Endpoints ---
-
-// Endpoint để lấy tất cả thông báo
 app.get("/api/notifications", async (req, res) => {
+  // Endpoint để lấy tất cả thông báo
   try {
-    // Lấy các thông báo mới nhất, giới hạn 20
     const notifications = await Notification.find({})
       .sort({ createdAt: -1 })
       .limit(20);
@@ -258,8 +256,8 @@ app.get("/api/notifications", async (req, res) => {
   }
 });
 
-// Endpoint để tạo một thông báo mới (để test)
 app.post("/api/notifications", async (req, res) => {
+  // Endpoint để tạo một thông báo mới (để test)
   try {
     const { title, description, image, link, time } = req.body;
 
