@@ -10,6 +10,7 @@ const Dish = require("./models/Dish");
 const User = require("./models/User"); // Import User model
 const BannerSlide = require("./models/BannerSlide"); // Import BannerSlide model
 const Notification = require("./models/Notification"); // Import Notification model
+const Booking = require("./models/Booking"); // Import Booking model
 
 const app = express();
 const port = 3001;
@@ -280,6 +281,54 @@ app.post("/api/notifications", async (req, res) => {
     console.error("Error creating notification:", error);
     res.status(500).json({ message: "Lỗi máy chủ khi tạo thông báo." });
   }
+});
+
+// --- Booking Endpoints ---
+
+// Endpoint để tạo một booking mới
+app.post("/api/bookings", async (req, res) => {
+  try {
+    const { name, phone, date, time, guests, notes, userId, orderedDishes } =
+      req.body;
+
+    // Kiểm tra dữ liệu đầu vào cơ bản
+    if (!name || !phone || !date || !time || !guests || !userId) {
+      return res
+        .status(400)
+        .json({ message: "Vui lòng điền đầy đủ thông tin bắt buộc." });
+    }
+
+    const newBooking = new Booking({
+      name,
+      phone,
+      date,
+      time,
+      guests,
+      notes,
+      user: userId, // Liên kết với user đã đặt
+      orderedDishes, // Lưu mảng các món ăn đã đặt
+      status: "pending", // Trạng thái mặc định
+    });
+
+    const savedBooking = await newBooking.save();
+
+    res.status(201).json({
+      message: "Đặt bàn thành công!",
+      booking: savedBooking,
+    });
+  } catch (error) {
+    console.error("Error creating booking:", error);
+    res.status(500).json({
+      message: "Lỗi máy chủ khi tạo đơn đặt bàn.",
+      error: error.message,
+    });
+  }
+});
+
+// Endpoint để lấy lịch sử đặt bàn của một user (ví dụ)
+app.get("/api/bookings/user/:userId", async (req, res) => {
+  // ... Logic để lấy lịch sử đặt bàn sẽ được thêm ở đây
+  res.status(501).json({ message: "Tính năng đang được phát triển." });
 });
 
 app.listen(port, () => {
