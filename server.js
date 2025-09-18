@@ -327,8 +327,31 @@ app.post("/api/bookings", async (req, res) => {
 
 // Endpoint để lấy lịch sử đặt bàn của một user (ví dụ)
 app.get("/api/bookings/user/:userId", async (req, res) => {
-  // ... Logic để lấy lịch sử đặt bàn sẽ được thêm ở đây
-  res.status(501).json({ message: "Tính năng đang được phát triển." });
+  try {
+    const { userId } = req.params;
+
+    // Kiểm tra tính hợp lệ của userId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res
+        .status(400)
+        .json({ message: "Định dạng User ID không hợp lệ." });
+    }
+
+    // Tìm tất cả các booking của user đó và sắp xếp theo ngày mới nhất
+    const bookings = await Booking.find({ user: userId }).sort({ date: -1 });
+
+    if (!bookings) {
+      // Trường hợp này hiếm khi xảy ra, nhưng vẫn nên kiểm tra
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy lịch sử đặt bàn." });
+    }
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error fetching user booking history:", error);
+    res.status(500).json({ message: "Lỗi máy chủ khi lấy lịch sử đặt bàn." });
+  }
 });
 
 app.listen(port, () => {
