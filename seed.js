@@ -87,6 +87,20 @@ const menuListData = [
     category: "main_course",
   },
   {
+    name: "Gỏi Cuốn",
+    price: 40000,
+    description: "Gỏi cuốn tôm thịt với nước chấm đậm đà.",
+    imagePath: "../FoodHubWebsite/Frontend/assets/img/goicuon.jpg",
+    category: "appetizer",
+  },
+  {
+    name: "Chả giò",
+    price: 55000,
+    description: "Chả giò chiên giòn với nhân thịt và rau củ.",
+    imagePath: "../FoodHubWebsite/Frontend/assets/img/chagio.jpg",
+    category: "appetizer",
+  },
+  {
     name: "Spaghetti",
     price: 85000,
     description: "Mì Ý sốt bò bằm cổ điển.",
@@ -108,6 +122,27 @@ const menuListData = [
     category: "appetizer",
   },
   {
+    name: "Món Tiramisu",
+    price: 40000,
+    description: "Món tráng miệng mát lạnh ngon ngọt được yêu thích",
+    imagePath: "../FoodHubWebsite/Frontend/assets/img/tiramisu.jpg",
+    category: "dessert",
+  },
+  {
+    name: "Rau câu dừa",
+    price: 30000,
+    description: "Rau câu dừa mát lạnh, thơm ngon.",
+    imagePath: "../FoodHubWebsite/Frontend/assets/img/raucaudua.jpg",
+    category: "dessert",
+  },
+  {
+    name: "Trà tắc",
+    price: 15000,
+    description: "Trà tắc mát lạnh, giải khát.",
+    imagePath: "../FoodHubWebsite/Frontend/assets/img/tra-tac.png",
+    category: "drink",
+  },
+  {
     name: "Nước ngọt có ga",
     price: 20000,
     description: "Nước ngọt mát lạnh (Coca-cola, Pepsi, Sprite).",
@@ -122,11 +157,11 @@ const menuListData = [
     category: "drink",
   },
   {
-    name: "Món Tiramisu",
-    price: 40000,
-    description: "Món tráng miệng mát lạnh ngon ngọt được yêu thích",
-    imagePath: "../FoodHubWebsite/Frontend/assets/img/tiramisu.jpg",
-    category: "dessert",
+    name: "Nước ép trái cây",
+    price: 35000,
+    description: "Nước ép trái cây tươi ngon, bổ dưỡng.",
+    imagePath: "../FoodHubWebsite/Frontend/assets/img/drink.png",
+    category: "drink",
   },
 ];
 
@@ -219,7 +254,6 @@ const seedDB = async () => {
     console.log('Đã xóa dữ liệu cũ trong collection "notifications".');
     await Notification.insertMany(notificationData);
     console.log("Đã thêm dữ liệu thông báo thành công!");
-
   } catch (error) {
     console.error("Lỗi khi thêm dữ liệu:", error);
   } finally {
